@@ -3,7 +3,6 @@
 namespace Crhayes\Validation;
 
 use Crhayes\Validation\Exceptions\MissingValidatorException;
-use Illuminate\Support\Contracts\MessageProviderInterface;
 
 class GroupedValidator
 {
@@ -37,7 +36,7 @@ class GroupedValidator
 	 * Static shorthand for creating a new grouped validator.
 	 * 
 	 * @param  mixed 	$validator
-	 * @return Crhayes\Validation\GroupedValidator
+	 * @return \Crhayes\Validation\GroupedValidator
 	 */
 	public static function make($validator = [])
 	{
@@ -50,7 +49,7 @@ class GroupedValidator
 	 * 
 	 * @param mixed 	$validator
 	 */
-	public function addValidator(MessageProviderInterface $validator)
+	public function addValidator($validator)
 	{
 		$validator = is_array($validator) ? $validator : [$validator];
 		
@@ -58,6 +57,19 @@ class GroupedValidator
 
 		return $this;
 	}
+
+    /**
+     * Performs a batch validation for data requiring the same validation
+     *
+     * @param array $dataCollection
+     * @param ContextualValidator $validator
+     * @param null $context
+     * @return $this
+     */
+    public function batchValidate(array $dataCollection, ContextualValidator $validator, $context = null )
+    {
+        return $this->addValidator(BatchValidator::process($dataCollection,$validator,$context)->getValidators());
+    }
 
 	/**
 	 * Perform a check to see if all of the validators have passed.
@@ -92,7 +104,7 @@ class GroupedValidator
 	/**
 	 * Return the combined errors from all validators.
 	 * 
-	 * @return Illuminate\Support\MessageBag
+	 * @return \Illuminate\Support\MessageBag
 	 */
 	public function errors()
 	{

@@ -5,6 +5,7 @@ namespace Crhayes\Validation;
 use Crhayes\Validation\Exceptions\ReplacementBindingException;
 use Crhayes\Validation\Exceptions\ValidatorContextException;
 use Illuminate\Support\Contracts\MessageProviderInterface;
+use Illuminate\Validation\Factory;
 use Input;
 use Validator;
 
@@ -73,7 +74,7 @@ abstract class ContextualValidator implements MessageProviderInterface
 	 * Static shorthand for creating a new validator.
 	 * 
 	 * @param  mixed 	$validator
-	 * @return Crhayes\Validation\GroupedValidator
+	 * @return \Crhayes\Validation\GroupedValidator
 	 */
 	public static function make($attributes = null, $context = null)
 	{
@@ -84,7 +85,7 @@ abstract class ContextualValidator implements MessageProviderInterface
 	 * Set the validation attributes.
 	 *
 	 * @param  array $attributes
-	 * @return Crhayes\Validation\GroupedValidator
+	 * @return \Crhayes\Validation\GroupedValidator
 	 */
 	public function setAttributes($attributes = null)
 	{
@@ -121,7 +122,7 @@ abstract class ContextualValidator implements MessageProviderInterface
 	 * Set the validation context.
 	 *
 	 * @param  array|string $context
-	 * @return Crhayes\Validation\GroupedValidator
+	 * @return \Crhayes\Validation\GroupedValidator
 	 */
 	public function setContext($context)
 	{
@@ -145,7 +146,7 @@ abstract class ContextualValidator implements MessageProviderInterface
 	 * 
 	 * @param  string 	$field
 	 * @param  array 	$replacement
-	 * @return Crhayes\Validation\ContextualValidator
+	 * @return \Crhayes\Validation\ContextualValidator
 	 */
 	public function bindReplacement($field, array $replacement)
 	{
@@ -173,6 +174,8 @@ abstract class ContextualValidator implements MessageProviderInterface
 	public function passes()
 	{
 		$rules = $this->bindReplacements($this->getRulesInContext());
+
+
 
 		$validation = Validator::make($this->attributes, $rules, $this->messages);
 
@@ -206,7 +209,7 @@ abstract class ContextualValidator implements MessageProviderInterface
 	/**
 	 * Return any errors.
 	 * 
-	 * @return Illuminate\Support\MessageBag
+	 * @return \Illuminate\Support\MessageBag
 	 */
 	public function errors()
 	{
