@@ -175,8 +175,6 @@ abstract class ContextualValidator implements MessageProviderInterface
 	{
 		$rules = $this->bindReplacements($this->getRulesInContext());
 
-
-
 		$validation = Validator::make($this->attributes, $rules, $this->messages);
 
 		if ($validation->passes()) return true;

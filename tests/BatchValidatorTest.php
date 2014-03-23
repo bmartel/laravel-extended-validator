@@ -40,26 +40,26 @@ class BatchValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testProcessMethodReturnsBatchValidator()
     {
-        $this->assertInstanceOf('\Crhayes\Validation\BatchValidator', BatchValidator::process($this->input, $this->validator));
+        $this->assertInstanceOf('\Crhayes\Validation\BatchValidator', (new BatchValidator())->process($this->input, $this->validator));
     }
 
     public function testGetValidatorsReturnsArray()
     {
-        $validators = BatchValidator::process($this->input, $this->validator)->getValidators();
+        $validators = (new BatchValidator())->process($this->input, $this->validator)->getValidators();
 
         $this->assertEquals(true, is_array($validators));
     }
 
     public function testGetValidatorsReturnsValidatorForEachDataArray()
     {
-        $validators = BatchValidator::process($this->input, $this->validator)->getValidators();
+        $validators = (new BatchValidator())->process($this->input, $this->validator)->getValidators();
 
         $this->assertEquals(count($this->input), count($validators));
     }
 
     public function testAllValidatorsAreTheSameValidationClass()
     {
-        $validators = BatchValidator::process($this->input, $this->validator)->getValidators();
+        $validators = (new BatchValidator())->process($this->input, $this->validator)->getValidators();
 
         $this->assertInstanceOf('\Crhayes\Validation\ContextualValidator', $validators[0]);
         $this->assertInstanceOf('\Crhayes\Validation\ContextualValidator', $validators[1]);
@@ -67,7 +67,7 @@ class BatchValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testEachValidatorHasCorrectInput()
     {
-        $validators = BatchValidator::process($this->input, $this->validator)->getValidators();
+        $validators = (new BatchValidator())->process($this->input, $this->validator)->getValidators();
 
         $this->assertEquals($this->input[0], $validators[0]->getAttributes());
         $this->assertEquals($this->input[1], $validators[1]->getAttributes());
@@ -75,10 +75,21 @@ class BatchValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testSettingContextThroughConstructor()
     {
-        $validators = (new BatchValidator($this->input, $this->validator,$this->context))->getValidators();
+        $validators = (new BatchValidator())->process($this->input, $this->validator, $this->context)->getValidators();
 
         $this->assertEquals([$this->context], $validators[0]->getContexts());
         $this->assertEquals([$this->context], $validators[1]->getContexts());
+    }
+
+    public function testBindingReplacements()
+    {
+        $batchValidator = new BatchValidator();
+        $validators[] = new ConcreteValidator($this->input[0], ['edit']);
+        $validators[] = new ConcreteValidator($this->input[1], ['edit']);
+
+        $batchValidator->setValidators($validators);
+
+        $batchValidator->bindReplacements('first_name', 'id', [1,2]);
     }
 }
  

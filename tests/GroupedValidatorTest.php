@@ -2,6 +2,7 @@
 
 namespace Crhayes\Validation\Tests;
 
+use Crhayes\Validation\BatchValidator;
 use Crhayes\Validation\GroupedValidator;
 use Mockery as m;
 
@@ -21,7 +22,6 @@ class GroupedValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        parent::setUp();
         $this->input = [
             [
                 'first_name' => 'Chris',
@@ -111,7 +111,19 @@ class GroupedValidatorTest extends \PHPUnit_Framework_TestCase
         $groupedValidator = GroupedValidator::make()->addValidator([$validator1,$validator2]);
         $groupedValidator->fails();
 
-        $this->assertInstanceOf('\Illuminate\Support\MessageBag', $groupedValidator->errors());
+        $this->assertEquals(['errors'], $groupedValidator->errors()->getMessages()[0]);
+    }
+
+    public function testThatBatchValidateWorks()
+    {
+        $batchValidator = new BatchValidator();
+        $validator = m::mock('\CrHayes\Validation\ContextualValidator');
+
+        $groupedValidator = new GroupedValidator($batchValidator);
+
+        $groupedValidator->batchValidate($this->input, $validator);
+
+        $this->assertEquals(2,count($groupedValidator->getValidators()));
     }
 }
  

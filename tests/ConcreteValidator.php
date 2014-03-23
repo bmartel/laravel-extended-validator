@@ -12,6 +12,8 @@ class ConcreteValidator extends ContextualValidator
 			'last_name'  => 'required',
 			'website'    => 'required|url'
 		],
-		'edit' => 'required|min:255'
+		'edit' => [
+            'first_name' => 'required|first_name|unique:users,first_name,@id'
+        ]
 	];
 }

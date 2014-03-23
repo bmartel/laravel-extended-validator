@@ -2,6 +2,8 @@
 
 namespace Crhayes\Validation;
 
+use Crhayes\Validation\Exceptions\ReplacementBindingException;
+
 class BatchValidator
 {
     /**
@@ -12,7 +14,7 @@ class BatchValidator
     /**
      * @var \Crhayes\Validation\ContextualValidator[]
      */
-    protected $validationSet = [];
+    protected $validationSet;
 
     /**
      * Process the validation against the collection of data
@@ -20,25 +22,40 @@ class BatchValidator
      * @param array $dataCollection
      * @param ContextualValidator $validator
      * @param null $context
+     * @return static
      */
-    public function __construct(array $dataCollection, ContextualValidator $validator, $context = null)
+    public function process(array $dataCollection, ContextualValidator $validator, $context = null)
     {
-        $this->validationSet = array_map(function($data) use($validator, $context){
-            return new $validator($data, $context);
-        },$dataCollection);
+        if($dataCollection && $validator) {
+            $this->validationSet = array_map(function ($data) use ($validator, $context) {
+                return $validator::make($data, $context);
+            }, $dataCollection);
+        }
+
+        return $this;
     }
 
     /**
-     * Static alias for the constructor
+     * Perform the replacement binding on all of the fields
      *
-     * @param array $dataCollection
-     * @param ContextualValidator $validator
-     * @param null $context
-     * @return static
+     * @param $field
+     * @param $replacements
      */
-    public static function process(array $dataCollection, ContextualValidator $validator, $context = null)
+    public function bindReplacements($field, $placeholder, $replacements)
     {
-        return new static($dataCollection,$validator,$context);
+        if (count($replacements) !== count($this->validationSet)) {
+            throw new ReplacementBindingException('Number of replacements bound must be equal to the validation set size');
+        } else {
+            array_map(function (&$validator,$index) use ($field, $placeholder,$replacements) {
+                $temp = null;
+                $temp[$placeholder] = $replacements[$index];
+
+                $validator->bindReplacement($field, $temp);
+
+            }, $this->validationSet, array_keys($this->validationSet));
+        }
+
+        return $this;
     }
 
     /**
@@ -49,5 +66,16 @@ class BatchValidator
     public function getValidators()
     {
         return $this->validationSet;
+    }
+
+    /**
+     * Set the validators
+     *
+     * @param ContextualValidator[]|ContextualValidator
+     */
+    public function setValidators($validators)
+    {
+        $validators = is_array($validators) ? $validators : [$validators];
+        $this->validationSet = $validators;
     }
 } 
