@@ -30,7 +30,9 @@ class ValidationServiceProvider extends ServiceProvider {
 	{
 		$this->app['groupedValidator'] = function()
 		{
-			return new GroupedValidator;
+			return new GroupedValidator(
+                new BatchValidator()
+            );
 		};
 	}
 
@@ -41,7 +43,7 @@ class ValidationServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array();
+		return [];
 	}
 
 }
