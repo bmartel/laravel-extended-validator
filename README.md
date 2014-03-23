@@ -226,3 +226,45 @@ $groupedValidator = GroupedValidator::make()
     ->addValidator($userValidator)
     ->addValidator($carValidator);
 ```
+Validate a collection of model data all against the same validation and contexts:
+```php
+$modelData = [
+    [
+        'first_name' => 'Jim',
+        'last_name'  => 'Jones',
+        'email'      => 'j.jones@email.com'
+    ],
+    [
+        'first_name' => 'Sally',
+        'last_name'  => 'Hansen',
+        'email'      => 's.hansen@email.com'
+    ]
+];
+
+$userValidator = UserValidator::make();
+    ->addContext('default');
+    
+$groupedValidator = GroupedValidator::make()
+    ->batchValidate($modelData,$userValidator);
+```
+If you need to bind replacements for the collection, just add it in the callback (currently binding replacements must be performed this way for batch validation):
+```php
+$modelKeys = [12,65];
+
+$userValidator = UserValidator::make();
+    ->addContext('edit');
+    
+$groupedValidator = GroupedValidator::make()
+    ->batchValidate($modelData,$userValidator,function($batch) use($modelKeys){
+        $batch->bindReplacements('email', 'id', $modelKeys);
+    });
+```
+Batch validation works in conjunction with the addition of other validators, you just add what you need:
+```php
+$groupedValidator = GroupedValidator::make()
+    ->batchValidate($arrayOfModelData,UserValidator::make())
+    ->addValidator(new CarValidator())
+    ->addValidator(new SomeOtherValidator());
+
+$groupedValidator->passes(); //and it validates everything!
+```
