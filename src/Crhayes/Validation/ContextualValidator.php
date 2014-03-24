@@ -72,9 +72,10 @@ abstract class ContextualValidator implements MessageProviderInterface
 
 	/**
 	 * Static shorthand for creating a new validator.
-	 * 
-	 * @param  mixed 	$validator
-	 * @return \Crhayes\Validation\GroupedValidator
+	 *
+	 * @param null $attributes
+	 * @param null $context
+	 * @return static
 	 */
 	public static function make($attributes = null, $context = null)
 	{
@@ -105,9 +106,60 @@ abstract class ContextualValidator implements MessageProviderInterface
 	}
 
 	/**
+	 * Retrieve the validation attributes by key
+	 *
+	 * @param null $key
+	 * @return array
+	 */
+	public function get($key = null) {
+
+		if ($key && $this->has($key)) {
+			return $this->attributes[$key];
+		}
+
+		return $this->attributes; // Return All Data if key is null
+	}
+
+	/**
+	 * Get only attributes specified by the keys
+	 *
+	 * @param array $keys
+	 * @return array
+	 */
+	public function getOnly(array $keys) {
+
+		return array_only($this->attributes, $keys);
+	}
+
+	/**
+	 * Retrieve all attributes ignoring the keys specified
+	 *
+	 * @param array $keys
+	 * @return array
+	 */
+	public function getIgnore(array $keys) {
+
+		return array_except($this->attributes, $keys);
+	}
+
+	/**
+	 * Check data key exists
+	 *
+	 * @param $required_keys
+	 * @return bool
+	 */
+	public function has($required_keys) {
+
+		$required_keys = is_array($required_keys) ? $required_keys : func_get_args();
+
+		return count(array_intersect_key(array_flip($required_keys), $this->attributes)) === count($required_keys);
+	}
+
+	/**
 	 * Add a validation context.
-	 * 
-	 * @param array 	$context
+	 *
+	 * @param $context
+	 * @return $this
 	 */
 	public function addContext($context)
 	{
@@ -218,8 +270,9 @@ abstract class ContextualValidator implements MessageProviderInterface
 
 	/**
 	 * Get the validaton rules within the context of the current validation.
-	 * 
-	 * @return array
+	 *
+	 * @return array|mixed
+	 * @throws Exceptions\ValidatorContextException
 	 */
 	private function getRulesInContext()
 	{
@@ -249,9 +302,10 @@ abstract class ContextualValidator implements MessageProviderInterface
 	/**
 	 * Spin through our contextual rules array and bind any replacement
 	 * values to placeholders within the rules.
-	 * 
-	 * @param  array 	$rules
-	 * @return array
+	 *
+	 * @param $rules
+	 * @return mixed
+	 * @throws Exceptions\ReplacementBindingException
 	 */
 	private function bindReplacements($rules)
 	{
