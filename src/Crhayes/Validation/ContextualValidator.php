@@ -21,6 +21,20 @@ abstract class ContextualValidator implements MessageProviderInterface
 	protected $attributes = [];
 
 	/**
+	 * Validator data
+	 *
+	 * @var array
+	 */
+	protected $data = [];
+
+	/**
+	 * Validator files
+	 *
+	 * @var array
+	 */
+	protected $files = [];
+
+	/**
 	 * Store the validation rules.
 	 * 
 	 * @var array
@@ -106,40 +120,46 @@ abstract class ContextualValidator implements MessageProviderInterface
 	}
 
 	/**
-	 * Retrieve the validation attributes by key
+	 * Retrieve a file, data element, or all request data
 	 *
 	 * @param null $key
 	 * @return array
 	 */
 	public function get($key = null) {
 
-		if ($key && $this->has($key)) {
-			return $this->attributes[$key];
+		if ($key) {
+			if ($this->has($key)) {
+				return $this->data[$key];
+			}
+
+			if ($this->hasFile($key)) {
+				return $this->files[$key];
+			}
 		}
 
-		return $this->attributes; // Return All Data if key is null
+		return array_merge($this->data, $this->files); // Return All Data if key is null
 	}
 
 	/**
-	 * Get only attributes specified by the keys
+	 * Get only inputs specified in the data|file arrays
 	 *
 	 * @param array $keys
 	 * @return array
 	 */
 	public function getOnly(array $keys) {
 
-		return array_only($this->attributes, $keys);
+		return array_merge(array_only($this->data, $keys), array_only($this->files, $keys));
 	}
 
 	/**
-	 * Retrieve all attributes ignoring the keys specified
+	 * Retrieve all data ignoring the keys specified
 	 *
 	 * @param array $keys
 	 * @return array
 	 */
 	public function getIgnore(array $keys) {
 
-		return array_except($this->attributes, $keys);
+		return array_merge(array_except($this->data, $keys), array_except($this->files, $keys));
 	}
 
 	/**
@@ -152,8 +172,22 @@ abstract class ContextualValidator implements MessageProviderInterface
 
 		$required_keys = is_array($required_keys) ? $required_keys : func_get_args();
 
-		return count(array_intersect_key(array_flip($required_keys), $this->attributes)) === count($required_keys);
+		return count(array_intersect_key(array_flip($required_keys), $this->data)) === count($required_keys);
 	}
+
+	/**
+	 * Check file key exists
+	 *
+	 * @param $required_keys
+	 * @return bool
+	 */
+	public function hasFile($required_keys) {
+
+		$required_keys = is_array($required_keys) ? $required_keys : func_get_args();
+
+		return count(array_intersect_key(array_flip($required_keys), $this->files)) === count($required_keys);
+	}
+
 
 	/**
 	 * Add a validation context.
@@ -228,6 +262,10 @@ abstract class ContextualValidator implements MessageProviderInterface
 		$rules = $this->bindReplacements($this->getRulesInContext());
 
 		$validation = Validator::make($this->attributes, $rules, $this->messages);
+
+		// Set the attributes array to the split data/files from the validator
+		$this->data = $validation->getData();
+		$this->files = $validation->getFiles();
 
 		if ($validation->passes()) return true;
 
