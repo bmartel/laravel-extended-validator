@@ -119,6 +119,8 @@ class GroupedValidator {
 	public function setBatchValidator(BatchValidator $batchValidator) {
 
 		$this->batchValidator = $batchValidator;
+
+		return $this;
 	}
 
 	/**
