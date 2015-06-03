@@ -4,12 +4,12 @@ namespace Crhayes\Validation;
 
 use Crhayes\Validation\Exceptions\ReplacementBindingException;
 use Crhayes\Validation\Exceptions\ValidatorContextException;
-use Illuminate\Support\Contracts\MessageProviderInterface;
+use Illuminate\Support\Contracts\MessageProvider;
 use Illuminate\Validation\Factory;
 use Input;
 use Validator;
 
-abstract class ContextualValidator implements MessageProviderInterface
+abstract class ContextualValidator implements MessageProvider
 {
 	const DEFAULT_KEY = 'default';
 

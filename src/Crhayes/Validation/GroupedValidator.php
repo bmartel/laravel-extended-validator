@@ -4,6 +4,7 @@ namespace Crhayes\Validation;
 
 use Crhayes\Validation\Exceptions\MissingValidatorException;
 use Crhayes\Validation\Exceptions\ValidatorContextException;
+use Illuminate\Contracts\Support\MessageProvider;
 
 class GroupedValidator {
 
@@ -57,9 +58,9 @@ class GroupedValidator {
 	 * Add a validator to spin through. Accepts either a single
 	 * Validator object or an array of validators.
 	 *
-	 * @param mixed $validator
+	 * @param MessageProvider $validator
 	 */
-	public function addValidator($validator) {
+	public function addValidator(MessageProvider $validator) {
 
 		$validator = is_array($validator) ? $validator : [$validator];
 
